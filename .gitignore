@@ -5,7 +5,15 @@
 .claude/
 CLAUDE.md
 
-# Python
+# Python envs / caches (any level)
 .venv/
 __pycache__/
 *.pyc
+
+# generated poster output — recreate with make_poster.py
+poster/drafts/
+
+# downloadable + derived images — recreate with fetch_images.py
+# (only KIAS-banner.png is stored in the repo)
+poster/images/*
+!poster/images/KIAS-banner.png
