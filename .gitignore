@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# local Claude Code settings / notes
+.claude/
+CLAUDE.md
+
+# Python
+__pycache__/
+*.pyc
