@@ -85,7 +85,15 @@ CONTACT   = "고등과학원 위선미 (smwee@kias.re.kr, 02-958-2640)"
 FOOTER     = "고등과학원 KIAS · http://events.kias.re.kr/h/astroschool2026"
 FOOTER_URL = "http://events.kias.re.kr/h/astroschool2026"
 
-IMAGE_CREDIT = "NASA/JPL-Caltech — SPHEREx all-sky reference map (LinesRB/StarsRGB)"
+IMAGE_CREDIT = "SPHEREx 전천(全天) 지도 — 먼지·가스(왼쪽), 별·은하(오른쪽) · NASA/JPL-Caltech"
+
+# Image credit + mission acknowledgment, shown under the banner (one line each,
+# credit first). CREDIT_CLASS picks the font: "en" (Latin) or "kr" (Korean).
+CREDIT_CLASS = "kr"
+SPHEREX_NOTE = [
+    "SPHEREx: Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer.",
+    "미국항공우주국(NASA)과 한국천문연구원(KASI)이 공동 개발한 우주망원경",
+]
 
 # Oval all-sky image shown as a banner under the title. Use the transparent
 # cutout produced by cut_oval.py (black background removed); a 2:1 ellipse on a
@@ -101,9 +109,9 @@ BLEND = "craft"
 #   CRAFT_BOX    — (x, y, width, height) in the 680x960 poster space
 #   CRAFT_FLIP   — mirror left-right (True = aperture faces into the oval)
 #   CRAFT_ROTATE — extra rotation in degrees, counter-clockwise
-CRAFT_BOX = (470, 170, 198, 198)
+CRAFT_BOX = (470, 148, 216, 216)
 CRAFT_FLIP = True
-CRAFT_ROTATE = 30
+CRAFT_ROTATE = 50
 
 # QR code + KIAS logo (bottom-right, like the 2024 poster). QR encodes QR_URL.
 SHOW_QR = True
@@ -145,7 +153,7 @@ def build_topics_block(topics):
     """Render the three-lecture-themes section (monochrome, left-aligned)."""
     out = []
     for i, t in enumerate(topics):
-        y = 692 + i * 54
+        y = 706 + i * 54
         out.append(
             f'<text class="mono" x="50" y="{y}" fill="#2a3350" font-size="16" font-weight="600">{x(t["num"])}</text>\n'
             f'<text class="kr" x="86" y="{y}" fill="#15151c" font-size="20" font-weight="600">{x(t["title"])}</text>\n'
@@ -158,7 +166,7 @@ def build_info_block(fields):
     """Render the logistics rows (bold label, then value on the same line)."""
     out = []
     for i, f in enumerate(fields):
-        y = 546 + i * 26
+        y = 560 + i * 26
         placeholder = f.get("placeholder", False)
         if placeholder:
             value_attrs = 'fill="#8893a8" font-size="16" font-style="italic"'
@@ -215,6 +223,11 @@ def build_svg():
     """Assemble the full SVG string from the CONTENT variables."""
     topics_svg = build_topics_block(TOPICS)
     info_svg = build_info_block(INFO_FIELDS)
+    # SPHEREx note follows the image credit (after a line break), under the banner.
+    note_svg = "".join(
+        f'<tspan x="636" dy="{14 if i == 0 else 12}" font-size="9" fill="#565f78">{x(line)}</tspan>'
+        for i, line in enumerate(SPHEREX_NOTE)
+    )
 
     overlay = ""
     if BLEND == "craft":
@@ -242,8 +255,8 @@ def build_svg():
         qr_href = _image_href(build_qr_asset(QR_URL))
         logo_href = _image_href(KIAS_LOGO)
         # QR and logo share the same height, top and bottom so they line up.
-        qr = (f'<image href="{qr_href}" x="488" y="856" width="60" height="60"/>'
-              f'<image href="{logo_href}" x="562" y="856" width="68" height="60" '
+        qr = (f'<image href="{qr_href}" x="488" y="870" width="60" height="60"/>'
+              f'<image href="{logo_href}" x="562" y="870" width="68" height="60" '
               f'preserveAspectRatio="xMidYMid meet"/>')
 
     header = SVG_HEADER.replace(
@@ -254,24 +267,24 @@ def build_svg():
 
 <text class="en" x="340" y="166" text-anchor="middle" fill="#7a86a0" font-size="14" letter-spacing="2"><tspan x="340">{x(SUBTITLE_EN[0])}</tspan><tspan x="340" dy="20">{x(SUBTITLE_EN[1])}</tspan></text>
 
-<text class="en" x="636" y="520" text-anchor="end" fill="#aab2c2" font-size="7">{x(IMAGE_CREDIT)}</text>
+<text class="{CREDIT_CLASS}" x="636" y="512" text-anchor="end" fill="#9aa3b5" font-size="8"><tspan x="636">{x(IMAGE_CREDIT)}</tspan>{note_svg}</text>
 
 {info_svg}
 
-<line x1="50" y1="642" x2="630" y2="642" stroke="#dde1ea" stroke-width="1"/>
+<line x1="50" y1="656" x2="630" y2="656" stroke="#dde1ea" stroke-width="1"/>
 
-<text class="kr" x="50" y="666" fill="#3a4a6a" font-size="14" letter-spacing="3" font-weight="600">{x(SECTION_LABEL)}</text>
+<text class="kr" x="50" y="680" fill="#3a4a6a" font-size="14" letter-spacing="3" font-weight="600">{x(SECTION_LABEL)}</text>
 
 {topics_svg}
 
-<line x1="50" y1="838" x2="630" y2="838" stroke="#dde1ea" stroke-width="1"/>
+<line x1="50" y1="852" x2="630" y2="852" stroke="#dde1ea" stroke-width="1"/>
 
-<text class="kr" x="50" y="858" fill="#2a3350" font-size="13" font-weight="700">조직위원</text>
-<text class="kr" x="150" y="858" fill="#15151c" font-size="13">{x(COMMITTEE)}</text>
-<text class="kr" x="50" y="882" fill="#2a3350" font-size="13" font-weight="700">문의사항</text>
-<text class="kr" x="150" y="882" fill="#15151c" font-size="13">{x(CONTACT)}</text>
+<text class="kr" x="50" y="872" fill="#2a3350" font-size="13" font-weight="700">조직위원</text>
+<text class="kr" x="150" y="872" fill="#15151c" font-size="13">{x(COMMITTEE)}</text>
+<text class="kr" x="50" y="896" fill="#2a3350" font-size="13" font-weight="700">문의사항</text>
+<text class="kr" x="150" y="896" fill="#15151c" font-size="13">{x(CONTACT)}</text>
 
-<a href="{x(FOOTER_URL)}" xlink:href="{x(FOOTER_URL)}" target="_blank"><text class="kr" x="50" y="910" fill="#8893a8" font-size="10" letter-spacing="1">{x(FOOTER)}</text></a>
+<a href="{x(FOOTER_URL)}" xlink:href="{x(FOOTER_URL)}" target="_blank"><text class="kr" x="50" y="924" fill="#8893a8" font-size="10" letter-spacing="1">{x(FOOTER)}</text></a>
 {qr}
 '''
 

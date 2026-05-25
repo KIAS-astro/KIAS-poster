@@ -6,5 +6,6 @@
 CLAUDE.md
 
 # Python
+.venv/
 __pycache__/
 *.pyc

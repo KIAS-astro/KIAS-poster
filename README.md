@@ -4,8 +4,9 @@ Generates the poster for the 2026 KIAS Summer School on Extragalactic Astronomy
 and Cosmology — a white layout with a SPHEREx all-sky banner and a SPHEREx
 spacecraft, rendered to SVG, PNG, and a print-ready vector PDF.
 
-The generator scripts and images live in `poster/`; the commands below assume
-you `cd poster` first (paths like `images/` and `drafts/` are relative to it).
+Run the **Setup** commands from the repo root (where `env.yml` lives); then
+`cd poster` to **build**. The generator scripts live in `poster/` and use paths
+like `images/` and `drafts/` relative to it.
 
 ## Setup
 
@@ -25,8 +26,9 @@ pip install -r requirements.txt
 ```
 
 Notes:
-- macOS: `brew install cairo` (cairosvg needs it). Korean text uses the system
-  font "Apple SD Gothic Neo".
+- The conda env includes cairo. For the pip path on macOS, also run
+  `brew install cairo` (cairosvg needs it). Korean text uses the system font
+  "Apple SD Gothic Neo".
 - Linux: install a CJK font, e.g. `apt install fonts-noto-cjk`; the scripts fall
   back to "Noto Sans CJK KR" automatically.
 
@@ -39,23 +41,22 @@ python make_poster.py        # renders the poster into drafts/
 ```
 
 `fetch_images.py` is needed once after cloning: the SPHEREx all-sky maps and
-spacecraft are downloaded (not committed) and the derived cutouts are rebuilt.
-`KIAS-banner.png` and the artist scene are stored in the repo.
+spacecraft are downloaded (not committed) and the oval cutouts are rebuilt.
+`KIAS-banner.png` is the only image stored in the repo.
 
 Outputs land in `drafts/` as `*.svg`, `*.png` (2040x2880), and `*.pdf` (vector;
 use this for printing — sized for B3 / the ISO 1:√2 family).
 
 ## Editing
 
-Edit the CONTENT block at the top of `make_poster.py` (title, topics, lecturers,
-logistics, committee, contact). Key knobs:
+Edit the CONTENT block at the top of `make_poster.py`: title, English subtitle,
+section label, the three topics + lecturers, the logistics rows (dates, venue,
+audience), organizing committee, contact, footer, and the QR URL. Layout knobs:
 
-- `BLEND` — how the spacecraft appears: `None`, `"watermark"`, `"lower"`,
-  `"banner"`, `"craft"` (cut-out over the oval), `"background"` (full-page).
+- `BLEND` — `"craft"` (cut-out spacecraft over the oval banner) or `None` (banner only).
 - `CENTER_IMAGE` — the oval banner image; set to `None` to drop it.
-- `CRAFT_BOX`, `CRAFT_FLIP`, `CRAFT_ROTATE` — placement of the cut-out spacecraft.
-- `BG_TRANSFORM`, `BG_TELE_FRAC`, `BG_ZOOM` — framing of the background spacecraft.
-- `TEXT_STROKE`, `CREDIT_COLOR` — legibility tweaks for busy backgrounds.
+- `CRAFT_BOX`, `CRAFT_FLIP`, `CRAFT_ROTATE` — size / position / orientation of the spacecraft.
+- `SHOW_QR`, `QR_URL`, `KIAS_LOGO` — the bottom-right QR code and logo.
 
 ## Image assets (regenerating)
 
