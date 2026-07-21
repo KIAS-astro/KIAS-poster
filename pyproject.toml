@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kias-poster"
+version = "2026.0"
+description = "Poster generator for the KIAS Summer School on Extragalactic Astronomy and Cosmology"
+requires-python = ">=3.10"
+dependencies = [
+    "cairosvg",
+    "qrcode",
+    "pillow",
+    "pypdf",
+    "pyyaml",
+    "numpy",
+]
+
+[project.scripts]
+kias-poster = "posterkit.render:main"
+
+[tool.setuptools.packages.find]
+include = ["posterkit*"]

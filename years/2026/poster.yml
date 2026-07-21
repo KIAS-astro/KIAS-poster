@@ -1,0 +1,77 @@
+# 2026 KIAS Summer School poster — content and render settings.
+# Copy this whole years/2026/ directory to years/<next>/ and edit below.
+# Render with:  python -m posterkit --year years/2026
+
+# ---- content: words and people, edited every year ----
+content:
+  # SVG <title>/<desc> — accessibility text embedded in the vector file.
+  doc_title: "2026 KIAS Summer School Poster — 외부은하와 우주론"
+  doc_desc:  "KIAS Summer School 2026 poster: SPHEREx all-sky map banner over a white layout."
+
+  # Two-line Korean title: [text, font-size].
+  title_kr:
+    - ["고등과학원 천체물리 여름학교 2026", 28]
+    - ["외부은하와 우주론", 54]
+
+  subtitle_en:
+    - "2026 KIAS Summer School on"
+    - "Extragalactic Astronomy and Cosmology"
+
+  section_label: "토론 주제 및 발제 강연자"
+
+  # Discussion themes; "lecturers" lists the 발제 강연자 for each.
+  topics:
+    - {num: "01", title: "우주거대구조 관측을 통한 새로운 물리 탐색", lecturers: "박현배 (IBS) · 심준섭 (부산대)"}
+    - {num: "02", title: "은하 탐사",                              lecturers: "정동희 (KIAS · PSU) · 황호성 (서울대)"}
+    - {num: "03", title: "천문학에서의 인공지능",                  lecturers: "김지훈 (서울대) · 홍성욱 (천문연)"}
+
+  # Logistics rows. Set placeholder: true to italicize a value.
+  info_fields:
+    - {label: "기간",      value: "7월 13일(월)–16일(목)"}
+    - {label: "등록 마감", value: "6월 19일(금)"}
+    - {label: "장소",      value: "양평 수향더한옥 펜션"}
+    - {label: "참가 대상", value: "천문학 관련 대학원생 및 연구원"}
+
+  committee: "박창범, 김정규, 김주한, 정동희, 황호성"
+  contact:   "고등과학원 위선미 (smwee@kias.re.kr, 02-958-2640)"
+
+  footer:     "고등과학원 KIAS · http://events.kias.re.kr/h/astroschool2026"
+  footer_url: "http://events.kias.re.kr/h/astroschool2026"
+
+  image_credit: "SPHEREx 전천(全天) 지도 — 먼지·가스(왼쪽), 별·은하(오른쪽) · NASA/JPL-Caltech"
+
+  # Image-credit font: "en" (Latin) or "kr" (Korean).
+  credit_class: "kr"
+
+  # Mission acknowledgment under the banner (one line each, after the credit).
+  spherex_note:
+    - "SPHEREx: Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer."
+    - "미국항공우주국(NASA)과 한국천문연구원(KASI)이 공동 개발한 우주망원경"
+
+  qr_url: "http://events.kias.re.kr/h/astroschool2026/"
+
+# ---- render: layout and assets, edited only when the design changes ----
+# Image paths starting with "assets/" resolve under posterkit/assets/;
+# all other paths resolve under this year directory (years/2026/).
+render:
+  # Oval all-sky banner (transparent cutout from imageprep/cut_oval.py).
+  # Set to null to omit the banner.
+  center_image: "images/SPHEREx_Merged_cut.png"
+
+  # Spacecraft over the layout. blend: null (banner only) or "craft".
+  satellite_image: "images/SPHEREx_March2022-Satellite.png"
+  blend: "craft"
+
+  # Cut-out spacecraft placement when blend == "craft".
+  #   craft_box    — [x, y, width, height] in the 680x960 poster space
+  #   craft_flip   — mirror left-right (true = aperture faces into the oval)
+  #   craft_rotate — extra rotation in degrees, counter-clockwise
+  craft_box:    [470, 148, 216, 216]
+  craft_flip:   true
+  craft_rotate: 50
+
+  # QR code + KIAS logo, bottom-right. qr encodes qr_url.
+  show_qr:   true
+  kias_logo: "assets/KIAS-banner.png"
+
+  output_basename: "kias_summer_school_2026"

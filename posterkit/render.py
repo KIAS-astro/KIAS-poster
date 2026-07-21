@@ -1,24 +1,34 @@
 #!/usr/bin/env python3
-"""
-KIAS Summer School 2026 poster generator.
+"""KIAS Summer School poster generator (engine).
 
-Edit the CONTENT block below, run the script, and three files get written:
-    kias_summer_school_2026.svg   ← editable (Apple SD Gothic Neo first)
-    kias_summer_school_2026.png   ← 2040x2880, good for screens / decent for print
-    kias_summer_school_2026.pdf   ← vector, scales to any print size
+The engine is year-agnostic: it reads a year's ``poster.yml`` (content and
+render settings) and writes three files into that year's ``drafts/``:
 
-Requirements:
-    pip install cairosvg
+    <basename>.svg   ← editable (Apple SD Gothic Neo first)
+    <basename>.png   ← 2040x2880, good for screens / decent for print
+    <basename>.pdf   ← vector, scales to any print size
+
+Run from the repository root:
+
+    python -m posterkit --year years/2026
+
+Edit ``years/<year>/poster.yml``, not this file. To make a new year, copy an
+existing ``years/<year>/`` directory and edit its ``poster.yml`` and images.
+
+Requirements: cairosvg, qrcode, pillow, pypdf, pyyaml (see pyproject.toml).
     macOS: brew install cairo
     Linux: Noto Sans CJK KR installed for Korean rendering in the PNG.
     (On macOS the .svg itself uses Apple SD Gothic Neo for native editing.)
 """
+import argparse
 import base64
 import mimetypes
 import os
 import sys
 from html import escape as _esc
 from pathlib import Path
+
+import yaml
 
 # On macOS, point cairocffi at the Homebrew cairo before importing cairosvg.
 if sys.platform == "darwin":
@@ -31,6 +41,8 @@ if sys.platform == "darwin":
 
 from cairosvg import svg2png, svg2pdf  # noqa: E402
 
+KIT_DIR = Path(__file__).resolve().parent
+
 
 def x(s: str) -> str:
     """XML-escape user-provided text before inserting into the SVG."""
@@ -38,99 +50,13 @@ def x(s: str) -> str:
 
 
 # ============================================================
-# CONTENT — edit these to change what appears on the poster
-# ============================================================
-
-TITLE_KR = [
-    ("고등과학원 천체물리 여름학교 2026", 28),  # (line, font-size)
-    ("외부은하와 우주론",        54),
-]
-SUBTITLE_EN   = [
-    "2026 KIAS Summer School on",
-    "Extragalactic Astronomy and Cosmology",
-]
-SECTION_LABEL = "토론 주제 및 발제 강연자"
-
-# Three discussion themes; "lecturers" lists the 발제 강연자 for each.
-TOPICS = [
-    {
-        "num":       "01",
-        "title":     "우주거대구조 관측을 통한 새로운 물리 탐색",
-        "lecturers": "박현배 (IBS) · 심준섭 (부산대)",
-    },
-    {
-        "num":       "02",
-        "title":     "은하 탐사",
-        "lecturers": "정동희 (KIAS · PSU) · 황호성 (서울대)",
-    },
-    {
-        "num":       "03",
-        "title":     "천문학에서의 인공지능",
-        "lecturers": "김지훈 (서울대) · 홍성욱 (천문연)",
-    },
-]
-
-# Logistics rows. `placeholder=True` italicizes the value.
-INFO_FIELDS = [
-    {"label": "기간",      "value": "7월 13일(월)–16일(목)"},
-    {"label": "등록 마감", "value": "6월 19일(금)"},
-    {"label": "장소",      "value": "양평 수향더한옥 펜션"},
-    {"label": "참가 대상", "value": "천문학 관련 대학원생 및 연구원"},
-]
-
-# Organizing committee and contact, shown above the footer.
-COMMITTEE = "박창범, 김정규, 김주한, 정동희, 황호성"
-CONTACT   = "고등과학원 위선미 (smwee@kias.re.kr, 02-958-2640)"
-
-FOOTER     = "고등과학원 KIAS · http://events.kias.re.kr/h/astroschool2026"
-FOOTER_URL = "http://events.kias.re.kr/h/astroschool2026"
-
-IMAGE_CREDIT = "SPHEREx 전천(全天) 지도 — 먼지·가스(왼쪽), 별·은하(오른쪽) · NASA/JPL-Caltech"
-
-# Image credit + mission acknowledgment, shown under the banner (one line each,
-# credit first). CREDIT_CLASS picks the font: "en" (Latin) or "kr" (Korean).
-CREDIT_CLASS = "kr"
-SPHEREX_NOTE = [
-    "SPHEREx: Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer.",
-    "미국항공우주국(NASA)과 한국천문연구원(KASI)이 공동 개발한 우주망원경",
-]
-
-# Oval all-sky image shown as a banner under the title. Use the transparent
-# cutout produced by cut_oval.py (black background removed); a 2:1 ellipse on a
-# transparent field sits cleanly on the white poster. Set to None to omit it.
-CENTER_IMAGE = "images/SPHEREx_Merged_cut.png"
-
-# Spacecraft over the white layout. BLEND is None (oval banner only) or
-# "craft" (cut-out spacecraft placed over the oval banner).
-SATELLITE_IMAGE = "images/SPHEREx_March2022-Satellite.png"
-BLEND = "craft"
-
-# Placement of the cut-out spacecraft when BLEND == "craft".
-#   CRAFT_BOX    — (x, y, width, height) in the 680x960 poster space
-#   CRAFT_FLIP   — mirror left-right (True = aperture faces into the oval)
-#   CRAFT_ROTATE — extra rotation in degrees, counter-clockwise
-CRAFT_BOX = (470, 148, 216, 216)
-CRAFT_FLIP = True
-CRAFT_ROTATE = 50
-
-# QR code + KIAS logo (bottom-right, like the 2024 poster). QR encodes QR_URL.
-SHOW_QR = True
-QR_URL = "http://events.kias.re.kr/h/astroschool2026/"
-KIAS_LOGO = "images/KIAS-banner.png"
-
-OUTPUT_BASENAME = "kias_summer_school_2026"
-OUTPUT_DIR = "drafts"   # rendered posters and generated assets go here
-
-
-# ============================================================
-# SVG TEMPLATE — decorative elements (cosmic web, stars, AI nodes).
-# You normally don't need to touch this; edit CONTENT above instead.
+# SVG TEMPLATE — decorative frame. Content comes from poster.yml.
 # ============================================================
 
 SVG_HEADER = '''<?xml version="1.0" encoding="UTF-8"?>
 <svg width="680" height="960" viewBox="0 0 680 960" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img">
-<title>2026 KIAS Summer School Poster — 외부은하와 우주론</title>
-<desc>KIAS Summer School 2026 poster: SPHEREx all-sky map banner over a white layout.</desc>
+<title>__DOC_TITLE__</title>
+<desc>__DOC_DESC__</desc>
 
 <defs>
 <style type="text/css">
@@ -143,6 +69,9 @@ SVG_HEADER = '''<?xml version="1.0" encoding="UTF-8"?>
 <rect width="680" height="960" fill="#ffffff"/>
 __BACKGROUND_IMAGE__
 '''
+
+# Banner box for the oval all-sky image (a 2:1 ellipse). x, y, width, height.
+BANNER = (40, 204, 600, 300)
 
 
 # ============================================================
@@ -189,16 +118,12 @@ def _image_href(path):
     return f"data:{mime};base64,{data}"
 
 
-# Banner box for the oval all-sky image (a 2:1 ellipse). x, y, width, height.
-BANNER = (40, 204, 600, 300)
-
-
-def build_qr_asset(url):
+def build_qr_asset(url, out_dir):
     """Build (and cache) a QR-code PNG encoding url. Needs the qrcode package."""
     import qrcode
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    out_path = os.path.join(OUTPUT_DIR, "_qr.png")
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, "_qr.png")
     qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M,
                        box_size=12, border=2)
     qr.add_data(url)
@@ -219,72 +144,83 @@ def build_background_image(path):
     )
 
 
-def build_svg():
-    """Assemble the full SVG string from the CONTENT variables."""
-    topics_svg = build_topics_block(TOPICS)
-    info_svg = build_info_block(INFO_FIELDS)
+def build_svg(content, cfg, resolve, out_dir):
+    """Assemble the full SVG string from the poster.yml content and settings."""
+    topics_svg = build_topics_block(content["topics"])
+    info_svg = build_info_block(content["info_fields"])
     # SPHEREx note follows the image credit (after a line break), under the banner.
     note_svg = "".join(
         f'<tspan x="636" dy="{14 if i == 0 else 12}" font-size="9" fill="#565f78">{x(line)}</tspan>'
-        for i, line in enumerate(SPHEREX_NOTE)
+        for i, line in enumerate(content["spherex_note"])
     )
 
     overlay = ""
-    if BLEND == "craft":
+    blend = cfg.get("blend")
+    if blend == "craft":
         # Cut-out spacecraft over the oval banner: trim the transparent margins
-        # of SATELLITE_IMAGE, then apply the optional flip/rotation.
+        # of satellite_image, then apply the optional flip/rotation.
         from PIL import Image
-        img = Image.open(SATELLITE_IMAGE).convert("RGBA")
+        img = Image.open(resolve(cfg["satellite_image"])).convert("RGBA")
         img = img.crop(img.split()[-1].getbbox())
-        if CRAFT_FLIP:
+        if cfg.get("craft_flip"):
             img = img.transpose(Image.FLIP_LEFT_RIGHT)
-        if CRAFT_ROTATE:
-            img = img.rotate(CRAFT_ROTATE, expand=True, resample=Image.BICUBIC)
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
-        sat_path = os.path.join(OUTPUT_DIR, "_craft_satellite.png")
+        if cfg.get("craft_rotate"):
+            img = img.rotate(cfg["craft_rotate"], expand=True, resample=Image.BICUBIC)
+        os.makedirs(out_dir, exist_ok=True)
+        sat_path = os.path.join(out_dir, "_craft_satellite.png")
         img.save(sat_path)
-        cx, cy, cw, ch = CRAFT_BOX
+        cx, cy, cw, ch = cfg["craft_box"]
         href = _image_href(sat_path)
         overlay = (f'<image href="{href}" x="{cx}" y="{cy}" width="{cw}" height="{ch}" '
                    f'preserveAspectRatio="xMidYMid meet"/>')
-    elif BLEND is not None:
-        raise ValueError(f"unknown BLEND mode: {BLEND!r}")
+    elif blend is not None:
+        raise ValueError(f"unknown blend mode: {blend!r}")
 
     qr = ""
-    if SHOW_QR:
-        qr_href = _image_href(build_qr_asset(QR_URL))
-        logo_href = _image_href(KIAS_LOGO)
+    if cfg.get("show_qr"):
+        qr_href = _image_href(build_qr_asset(content["qr_url"], out_dir))
+        logo_href = _image_href(resolve(cfg["kias_logo"]))
         # QR and logo share the same height, top and bottom so they line up.
         qr = (f'<image href="{qr_href}" x="488" y="870" width="60" height="60"/>'
               f'<image href="{logo_href}" x="562" y="870" width="68" height="60" '
               f'preserveAspectRatio="xMidYMid meet"/>')
 
-    header = SVG_HEADER.replace(
-        "__BACKGROUND_IMAGE__", build_background_image(CENTER_IMAGE) + "\n" + overlay)
+    header = (
+        SVG_HEADER
+        .replace("__DOC_TITLE__", x(content["doc_title"]))
+        .replace("__DOC_DESC__", x(content["doc_desc"]))
+        .replace(
+            "__BACKGROUND_IMAGE__",
+            build_background_image(resolve(cfg.get("center_image"))) + "\n" + overlay,
+        )
+    )
+
+    title_kr = content["title_kr"]
+    subtitle_en = content["subtitle_en"]
 
     text_block = f'''
-<text class="kr" x="340" y="74" text-anchor="middle" letter-spacing="2"><tspan x="340" font-size="{TITLE_KR[0][1]}" font-weight="600" fill="#2a3350">{x(TITLE_KR[0][0])}</tspan><tspan x="340" dy="66" font-size="{TITLE_KR[1][1]}" font-weight="700" fill="#15151c">{x(TITLE_KR[1][0])}</tspan></text>
+<text class="kr" x="340" y="74" text-anchor="middle" letter-spacing="2"><tspan x="340" font-size="{title_kr[0][1]}" font-weight="600" fill="#2a3350">{x(title_kr[0][0])}</tspan><tspan x="340" dy="66" font-size="{title_kr[1][1]}" font-weight="700" fill="#15151c">{x(title_kr[1][0])}</tspan></text>
 
-<text class="en" x="340" y="166" text-anchor="middle" fill="#7a86a0" font-size="14" letter-spacing="2"><tspan x="340">{x(SUBTITLE_EN[0])}</tspan><tspan x="340" dy="20">{x(SUBTITLE_EN[1])}</tspan></text>
+<text class="en" x="340" y="166" text-anchor="middle" fill="#7a86a0" font-size="14" letter-spacing="2"><tspan x="340">{x(subtitle_en[0])}</tspan><tspan x="340" dy="20">{x(subtitle_en[1])}</tspan></text>
 
-<text class="{CREDIT_CLASS}" x="636" y="512" text-anchor="end" fill="#9aa3b5" font-size="8"><tspan x="636">{x(IMAGE_CREDIT)}</tspan>{note_svg}</text>
+<text class="{content["credit_class"]}" x="636" y="512" text-anchor="end" fill="#9aa3b5" font-size="8"><tspan x="636">{x(content["image_credit"])}</tspan>{note_svg}</text>
 
 {info_svg}
 
 <line x1="50" y1="656" x2="630" y2="656" stroke="#dde1ea" stroke-width="1"/>
 
-<text class="kr" x="50" y="680" fill="#3a4a6a" font-size="14" letter-spacing="3" font-weight="600">{x(SECTION_LABEL)}</text>
+<text class="kr" x="50" y="680" fill="#3a4a6a" font-size="14" letter-spacing="3" font-weight="600">{x(content["section_label"])}</text>
 
 {topics_svg}
 
 <line x1="50" y1="852" x2="630" y2="852" stroke="#dde1ea" stroke-width="1"/>
 
 <text class="kr" x="50" y="872" fill="#2a3350" font-size="13" font-weight="700">조직위원</text>
-<text class="kr" x="150" y="872" fill="#15151c" font-size="13">{x(COMMITTEE)}</text>
+<text class="kr" x="150" y="872" fill="#15151c" font-size="13">{x(content["committee"])}</text>
 <text class="kr" x="50" y="896" fill="#2a3350" font-size="13" font-weight="700">문의사항</text>
-<text class="kr" x="150" y="896" fill="#15151c" font-size="13">{x(CONTACT)}</text>
+<text class="kr" x="150" y="896" fill="#15151c" font-size="13">{x(content["contact"])}</text>
 
-<a href="{x(FOOTER_URL)}" xlink:href="{x(FOOTER_URL)}" target="_blank"><text class="kr" x="50" y="924" fill="#8893a8" font-size="10" letter-spacing="1">{x(FOOTER)}</text></a>
+<a href="{x(content["footer_url"])}" xlink:href="{x(content["footer_url"])}" target="_blank"><text class="kr" x="50" y="924" fill="#8893a8" font-size="10" letter-spacing="1">{x(content["footer"])}</text></a>
 {qr}
 '''
 
@@ -295,7 +231,7 @@ def build_svg():
 # RENDERING
 # ============================================================
 
-def render_outputs(svg_text, basename=OUTPUT_BASENAME, out_dir=OUTPUT_DIR):
+def render_outputs(svg_text, out_dir, basename, footer_url):
     """Write SVG, PNG, and PDF to out_dir."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -343,7 +279,7 @@ def render_outputs(svg_text, basename=OUTPUT_BASENAME, out_dir=OUTPUT_DIR):
     # cairosvg ignores <a> tags, so inject a clickable Link annotation over
     # the footer rectangle using pypdf. SVG is 680x960; the PDF cairosvg
     # produces is 510x720 pt (factor 0.75) with origin bottom-left.
-    _add_pdf_link(pdf_path, FOOTER_URL,
+    _add_pdf_link(pdf_path, footer_url,
                   svg_rect=(50, 897, 470, 912),
                   svg_size=(680, 960))
 
@@ -371,9 +307,56 @@ def _add_pdf_link(pdf_path, url, svg_rect, svg_size):
         writer.write(f)
 
 
-def main():
-    svg_text = build_svg()
-    svg_path, png_path, pdf_path = render_outputs(svg_text)
+# ============================================================
+# LOADING / CLI
+# ============================================================
+
+def make_resolver(year_dir):
+    """Resolve an image path from poster.yml to an absolute Path.
+
+    Paths starting with "assets/" resolve under posterkit/assets/ (year-invariant
+    assets like the KIAS logo); all other relative paths resolve under year_dir.
+    """
+    year_dir = Path(year_dir)
+
+    def resolve(path):
+        if not path:
+            return None
+        p = Path(path)
+        if p.is_absolute():
+            return p
+        if p.parts and p.parts[0] == "assets":
+            return KIT_DIR / "assets" / Path(*p.parts[1:])
+        return year_dir / p
+
+    return resolve
+
+
+def load_poster(year_dir):
+    """Read poster.yml from year_dir; return (content, render_cfg)."""
+    with open(Path(year_dir) / "poster.yml", encoding="utf-8") as f:
+        doc = yaml.safe_load(f)
+    return doc["content"], doc["render"]
+
+
+def build_year(year_dir):
+    """Load a year's poster.yml, build the SVG, and render all outputs."""
+    year_dir = Path(year_dir)
+    content, cfg = load_poster(year_dir)
+    resolve = make_resolver(year_dir)
+    out_dir = year_dir / "drafts"
+    svg_text = build_svg(content, cfg, resolve, out_dir)
+    return render_outputs(svg_text, out_dir, cfg["output_basename"],
+                          content["footer_url"])
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Render a KIAS Summer School poster.")
+    parser.add_argument("--year", required=True,
+                        help="year directory holding poster.yml (e.g. years/2026)")
+    args = parser.parse_args(argv)
+
+    svg_path, png_path, pdf_path = build_year(args.year)
     print(f"Wrote: {svg_path}")
     print(f"Wrote: {png_path}")
     print(f"Wrote: {pdf_path}")

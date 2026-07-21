@@ -1,8 +1,0 @@
-# pip alternative to env.yml (use a virtualenv).
-# macOS also needs the cairo library:  brew install cairo
-# Linux also needs a Korean CJK font, e.g.:  apt install fonts-noto-cjk
-cairosvg
-pillow
-numpy
-pypdf
-qrcode
