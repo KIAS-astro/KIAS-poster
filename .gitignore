@@ -1,9 +1,8 @@
 # macOS
 .DS_Store
 
-# local Claude Code settings / notes
+# local Claude Code settings (CLAUDE.md is tracked as project documentation)
 .claude/
-CLAUDE.md
 
 # Python envs / caches (any level)
 .venv/
