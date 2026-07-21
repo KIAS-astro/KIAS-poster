@@ -60,7 +60,7 @@ TOPICS = [
     },
     {
         "num":       "02",
-        "title":     "은하 서베이",
+        "title":     "은하 탐사",
         "lecturers": "정동희 (KIAS · PSU) · 황호성 (서울대)",
     },
     {
