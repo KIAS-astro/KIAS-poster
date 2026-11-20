@@ -1,24 +1,40 @@
-# KIAS Summer School poster
+# KIAS posters
 
-Generates the poster for the KIAS Summer School on Extragalactic Astronomy and
-Cosmology — a white layout with a SPHEREx all-sky banner and a SPHEREx
-spacecraft, rendered to SVG, PNG, and a print-ready vector PDF.
+Poster generators for KIAS events. Each event has a directory under
+`events/<event>/<year>/`; generated output goes to that directory's `drafts/`,
+which is not committed.
 
-The engine (`posterkit/`) is year-agnostic. Each year lives under
-`events/summer-school/<year>/` and holds one `poster.yml` (all content and layout settings)
-plus its images. To make a new year, copy an existing `events/summer-school/<year>/` directory
-and edit its `poster.yml`.
+| event | directory | generator |
+|---|---|---|
+| KIAS Summer School on Extragalactic Astronomy and Cosmology | `events/summer-school/` | `posterkit/` engine + `poster.yml` |
+| KIAS Quantum Universe Center (QUC) Workshop | `events/quc-workshop/` | standalone `make_poster.py`, see its [README](events/quc-workshop/2026/README.md) |
 
 ```
-posterkit/          reusable engine
-  render.py           builds the SVG and renders SVG/PNG/PDF from poster.yml
-  imageprep/          banner + spacecraft image preparation scripts
-  assets/             year-invariant assets (KIAS logo, style reference)
+posterkit/                  summer-school engine
+  render.py                   builds the SVG and renders SVG/PNG/PDF from poster.yml
+  imageprep/                  banner + spacecraft image preparation scripts
+  assets/                     shared assets (KIAS logo, style reference)
 events/summer-school/2026/
-  poster.yml          content + layout for the 2026 poster
-  images/             SPHEREx sources + cutouts (downloaded, not committed)
-  drafts/             generated output (not committed)
+  poster.yml                  content + layout for the 2026 poster
+  images/                     SPHEREx sources + cutouts (cutouts not committed)
+  CREDITS.md                  image credits
+  drafts/                     generated output (not committed)
+events/quc-workshop/2026/
+  make_poster.py              QUC Workshop 2026 poster and pattern figures
+  README.md
+  drafts/                     generated output (not committed)
 ```
+
+The rest of this file covers setup and the summer-school poster.
+
+## Summer School poster
+
+A white layout with a SPHEREx all-sky banner and a SPHEREx spacecraft,
+rendered to SVG, PNG, and a print-ready vector PDF. The engine (`posterkit/`)
+is year-agnostic. Each year lives under `events/summer-school/<year>/` and
+holds one `poster.yml` (all content and layout settings) plus its images. To
+make a new year, copy an existing `events/summer-school/<year>/` directory and
+edit its `poster.yml`.
 
 ## Setup
 

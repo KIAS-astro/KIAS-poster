@@ -1,4 +1,27 @@
-# Project: KIAS Summer School poster
+# Project: KIAS posters
+
+Poster generators for KIAS events, one directory per event and year under
+`events/<event>/<year>/`. Generated output goes to that directory's `drafts/`
+(gitignored).
+
+- `events/summer-school/` — the KIAS Summer School, built by the `posterkit/`
+  engine from `poster.yml`. Everything below the QUC section is about this event.
+- `events/quc-workshop/` — the KIAS Quantum Universe Center Workshop, built by a
+  standalone `make_poster.py` per year.
+
+## QUC Workshop (2026)
+- `events/quc-workshop/2026/make_poster.py` (Pillow + numpy + contourpy, macOS
+  system fonts). Run from the repo root; see that directory's `README.md`.
+- Chosen direction: light theme, Futura or Avenir, 2025 layout (QUC / WORKSHOP /
+  2026 stacked; venue and date placed and sized as in 2025). Sans-serif only:
+  no serif, no calligraphic faces.
+- A designer is commissioned for the final poster. Only the square pattern-only
+  figures (`patterns`) go to the designer, not a finished poster layout.
+- Regression check when touching `make_poster.py`: the rendered PNGs must stay
+  pixel-identical and the pattern SVGs byte-identical unless the change is meant
+  to alter them.
+
+## Summer School
 
 Goal: produce the poster for the KIAS Summer School on Extragalactic Astronomy
 and Cosmology, styled after `posterkit/assets/2024-Poster.png` — a **white

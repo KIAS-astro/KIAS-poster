@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kias-poster"
 version = "2026.0"
-description = "Poster generator for the KIAS Summer School on Extragalactic Astronomy and Cosmology"
+description = "Poster generators for KIAS events (Summer School, QUC Workshop)"
 requires-python = ">=3.10"
 dependencies = [
     "cairosvg",
