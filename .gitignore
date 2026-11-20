@@ -10,13 +10,13 @@ __pycache__/
 *.pyc
 *.egg-info/
 
-# generated poster output — recreate with `python -m posterkit --year years/<year>`
-years/*/drafts/
+# generated poster output, one drafts/ per events/<event>/<year>/
+events/*/*/drafts/
 
 # Track each year's raw SPHEREx sources (durable if the upstream download URLs
 # disappear), but not the derived cutouts — those are regenerated from the raw
 # sources by cut_oval / merge_oval (run posterkit.imageprep.fetch_images).
-years/*/images/*_cut.png
+events/summer-school/*/images/*_cut.png
 
 # large style reference (not needed to build) — the KIAS logo IS tracked
 posterkit/assets/2024-Poster.png

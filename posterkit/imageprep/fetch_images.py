@@ -4,7 +4,7 @@
 These images are freely available, so the repo fetches them rather than storing
 them. Run once after cloning (and again to refresh), from the repository root:
 
-    python -m posterkit.imageprep.fetch_images --dir years/2026/images
+    python -m posterkit.imageprep.fetch_images --dir events/summer-school/2026/images
 
 Kept in the repo instead (no public URL): posterkit/assets/KIAS-banner.png. The
 optional background/watermark/lower blend modes additionally need an artist
@@ -39,8 +39,8 @@ def download(url, dst):
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Download SPHEREx source images and rebuild the derived cutouts.")
-    parser.add_argument("--dir", default="years/2026/images",
-                        help="target images directory (default: years/2026/images)")
+    parser.add_argument("--dir", default="events/summer-school/2026/images",
+                        help="target images directory (default: events/summer-school/2026/images)")
     args = parser.parse_args(argv)
     images = args.dir
 

@@ -10,10 +10,10 @@ render settings) and writes three files into that year's ``drafts/``:
 
 Run from the repository root:
 
-    python -m posterkit --year years/2026
+    python -m posterkit --year events/summer-school/2026
 
-Edit ``years/<year>/poster.yml``, not this file. To make a new year, copy an
-existing ``years/<year>/`` directory and edit its ``poster.yml`` and images.
+Edit ``events/summer-school/<year>/poster.yml``, not this file. To make a new year, copy an
+existing ``events/summer-school/<year>/`` directory and edit its ``poster.yml`` and images.
 
 Requirements: cairosvg, qrcode, pillow, pypdf, pyyaml (see pyproject.toml).
     macOS: brew install cairo
@@ -353,7 +353,7 @@ def build_year(year_dir):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Render a KIAS Summer School poster.")
     parser.add_argument("--year", required=True,
-                        help="year directory holding poster.yml (e.g. years/2026)")
+                        help="year directory holding poster.yml (e.g. events/summer-school/2026)")
     args = parser.parse_args(argv)
 
     svg_path, png_path, pdf_path = build_year(args.year)

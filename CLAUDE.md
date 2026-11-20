@@ -6,22 +6,22 @@ background** with black title text, a sky-image banner near the top, and
 left-aligned logistics and lecture-topic blocks below.
 
 ## Layout
-- `posterkit/` is the reusable, year-agnostic engine. `years/<year>/` holds one
-  year's data. To make a new year, copy an existing `years/<year>/` directory
+- `posterkit/` is the reusable, year-agnostic engine. `events/summer-school/<year>/` holds one
+  year's data. To make a new year, copy an existing `events/summer-school/<year>/` directory
   and edit its `poster.yml`.
-- `posterkit/render.py` — reads `years/<year>/poster.yml`, builds the SVG, and
-  renders `<basename>.{svg,png,pdf}` into `years/<year>/drafts/`. Edit
+- `posterkit/render.py` — reads `events/summer-school/<year>/poster.yml`, builds the SVG, and
+  renders `<basename>.{svg,png,pdf}` into `events/summer-school/<year>/drafts/`. Edit
   `poster.yml`, not the engine.
 - `posterkit/imageprep/` — image-preparation scripts (`cut_oval.py`,
   `merge_oval.py`, `fetch_images.py`).
 - `posterkit/assets/` — year-invariant assets: `KIAS-banner.png` (tracked) and
   `2024-Poster.png` (style reference, gitignored — large).
-- `years/<year>/images/` — that year's imagery. The raw SPHEREx sources (two
+- `events/summer-school/<year>/images/` — that year's imagery. The raw SPHEREx sources (two
   JPGs + the spacecraft PNG) are tracked, so the poster survives if the download
   URLs disappear; the derived cutouts (`*_cut.png`) are gitignored and rebuilt
-  from the raw sources by `cut_oval`/`merge_oval`. `years/<year>/drafts/` —
+  from the raw sources by `cut_oval`/`merge_oval`. `events/summer-school/<year>/drafts/` —
   generated output (gitignored).
-- `years/<year>/CREDITS.md` — full image credits and acknowledgments for that
+- `events/summer-school/<year>/CREDITS.md` — full image credits and acknowledgments for that
   year (only short forms appear on the poster).
 
 ## Pipeline
@@ -29,11 +29,11 @@ left-aligned logistics and lecture-topic blocks below.
   conda. Install: conda+pip, conda+uv, or uv-only (see README). All install the
   `posterkit` package editable (`pip install -e .`).
 - Run everything from the repo root:
-  - `python -m posterkit.imageprep.fetch_images --dir years/2026/images` — the
+  - `python -m posterkit.imageprep.fetch_images --dir events/summer-school/2026/images` — the
     derived cutouts are gitignored, so rebuild them after cloning. This
     re-downloads the raw sources and rebuilds the cutouts; the tracked raw
     sources are the fallback if the download URLs die.
-  - `python -m posterkit --year years/2026` — renders the poster (also available
+  - `python -m posterkit --year events/summer-school/2026` — renders the poster (also available
     as the `kias-poster` console script).
 
 ## poster.yml
@@ -61,7 +61,7 @@ left-aligned logistics and lecture-topic blocks below.
 ## Chosen design (2026)
 - The "craft" version: `blend: craft`, `center_image:
   images/SPHEREx_Merged_cut.png`, cut-out spacecraft top-right (flipped to face
-  the galaxy). These are the values in `years/2026/poster.yml`.
+  the galaxy). These are the values in `events/summer-school/2026/poster.yml`.
 - Likely print size: B3 (353x500 mm, ISO 1:√2). Canvas 680x960 ≈ 0.708 fits it
   with negligible trim. Print from the vector PDF. If committing to B3, set the
   canvas to exact B3 and bump export resolution / asset sizes (canvas is a
@@ -70,7 +70,7 @@ left-aligned logistics and lecture-topic blocks below.
 ## Decided content (2026)
 - Venue: 양평 수향더한옥 펜션.
 - Discussion topics, 발제 강연자, 조직위원, 문의사항 are set in
-  `years/2026/poster.yml`.
+  `events/summer-school/2026/poster.yml`.
 
 ## Notes
 - Verify the SPHEREx image credit before printing (currently NASA/JPL-Caltech).

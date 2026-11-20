@@ -5,8 +5,8 @@ Cosmology — a white layout with a SPHEREx all-sky banner and a SPHEREx
 spacecraft, rendered to SVG, PNG, and a print-ready vector PDF.
 
 The engine (`posterkit/`) is year-agnostic. Each year lives under
-`years/<year>/` and holds one `poster.yml` (all content and layout settings)
-plus its images. To make a new year, copy an existing `years/<year>/` directory
+`events/summer-school/<year>/` and holds one `poster.yml` (all content and layout settings)
+plus its images. To make a new year, copy an existing `events/summer-school/<year>/` directory
 and edit its `poster.yml`.
 
 ```
@@ -14,7 +14,7 @@ posterkit/          reusable engine
   render.py           builds the SVG and renders SVG/PNG/PDF from poster.yml
   imageprep/          banner + spacecraft image preparation scripts
   assets/             year-invariant assets (KIAS logo, style reference)
-years/2026/
+events/summer-school/2026/
   poster.yml          content + layout for the 2026 poster
   images/             SPHEREx sources + cutouts (downloaded, not committed)
   drafts/             generated output (not committed)
@@ -69,10 +69,10 @@ Notes:
 
 ```bash
 # once after cloning: download SPHEREx source images + rebuild the cutouts
-python -m posterkit.imageprep.fetch_images --dir years/2026/images
+python -m posterkit.imageprep.fetch_images --dir events/summer-school/2026/images
 
-# render the poster into years/2026/drafts/
-python -m posterkit --year years/2026
+# render the poster into events/summer-school/2026/drafts/
+python -m posterkit --year events/summer-school/2026
 ```
 
 `fetch_images` is needed once after cloning: the SPHEREx all-sky maps and
@@ -80,12 +80,12 @@ spacecraft are downloaded (not committed) and the oval cutouts are rebuilt. The
 KIAS logo (`posterkit/assets/KIAS-banner.png`) is the only image stored in the
 repo.
 
-Outputs land in `years/2026/drafts/` as `*.svg`, `*.png` (2040x2880), and
+Outputs land in `events/summer-school/2026/drafts/` as `*.svg`, `*.png` (2040x2880), and
 `*.pdf` (vector; use this for printing — sized for B3 / the ISO 1:√2 family).
 
 ## Editing a year
 
-Edit `years/<year>/poster.yml`. It has two sections:
+Edit `events/summer-school/<year>/poster.yml`. It has two sections:
 
 - **`content`** — the words and people, edited every year: title, English
   subtitle, section label, the topics + lecturers, logistics rows (dates, venue,
@@ -102,9 +102,9 @@ Image paths in `poster.yml` that start with `assets/` resolve under
 ## Starting a new year
 
 ```bash
-cp -r years/2026 years/2027
-# edit years/2027/poster.yml, swap in years/2027/images/ as needed
-python -m posterkit --year years/2027
+cp -r events/summer-school/2026 events/summer-school/2027
+# edit events/summer-school/2027/poster.yml, swap in events/summer-school/2027/images/ as needed
+python -m posterkit --year events/summer-school/2027
 ```
 
 ## Image assets (regenerating)
@@ -113,9 +113,9 @@ python -m posterkit --year years/2027
 steps, if you want to run them by hand (from the repo root):
 
 ```bash
-python -m posterkit.imageprep.cut_oval  years/2026/images/SPHEREx_StarsRGB.jpg years/2026/images/SPHEREx_StarsRGB_cut.png
-python -m posterkit.imageprep.cut_oval  years/2026/images/SPHEREx_LinesRB.jpg  years/2026/images/SPHEREx_LinesRB_cut.png
-python -m posterkit.imageprep.merge_oval years/2026/images/SPHEREx_LinesRB_cut.png years/2026/images/SPHEREx_StarsRGB_cut.png years/2026/images/SPHEREx_Merged_cut.png
+python -m posterkit.imageprep.cut_oval  events/summer-school/2026/images/SPHEREx_StarsRGB.jpg events/summer-school/2026/images/SPHEREx_StarsRGB_cut.png
+python -m posterkit.imageprep.cut_oval  events/summer-school/2026/images/SPHEREx_LinesRB.jpg  events/summer-school/2026/images/SPHEREx_LinesRB_cut.png
+python -m posterkit.imageprep.merge_oval events/summer-school/2026/images/SPHEREx_LinesRB_cut.png events/summer-school/2026/images/SPHEREx_StarsRGB_cut.png events/summer-school/2026/images/SPHEREx_Merged_cut.png
 ```
 
 - `cut_oval` — elliptical alpha mask to drop the black around an all-sky oval.
